@@ -1,9 +1,11 @@
 import streamlit as st
 import langchain_helper
+from langchain_helper import LangchainHelper
 import pandas as pd
 
 
-class MainClass:
+class MainClass(LangchainHelper):
+
     if "test_scenarios" not in st.session_state:
         st.session_state.test_scenarios = "Enter a test scenario"
 
@@ -16,11 +18,10 @@ class MainClass:
     if "temp" not in st.session_state:
         st.session_state.temp = None
 
-    @staticmethod
-    def generate_test_scenario(acceptance_criteria=None):
+    def generate_test_scenario(self, acceptance_criteria=None):
         click = st.button(label="Generate test scenarios")
         if click:
-            response = langchain_helper.generate_test_scenarios(acceptance_criteria)
+            response = self.generate_test_scenarios(acceptance_criteria)
             st.session_state.test_scenarios = response["test_scenarios"]
         edit = st.checkbox(label="edit scenarios")
         if edit:
@@ -33,11 +34,10 @@ class MainClass:
             st.header("***Test Scenarios***")
             st.write(st.session_state.test_scenarios)
 
-    @staticmethod
-    def generate_test_case(test_scenario):
+    def generate_test_case(self, test_scenario):
         click_test_steps = st.button(label="Generate test steps")
         if click_test_steps:
-            response1 = langchain_helper.generate_test_steps(test_scenario)
+            response1 = self.generate_test_steps(test_scenario)
             st.session_state.temp = response1
             st.header("***Test Steps***")
             test_steps, expected_results = response1.split("Expected Results:")
@@ -63,24 +63,22 @@ class MainClass:
                                           data=st.session_state.test_steps.to_csv().encode('utf-8'),
                                           file_name='test_steps.csv')
 
-    @staticmethod
-    def generate_test_data(test_data_scenario):
+    def generate_test_data(self, test_data_scenario):
         click_data = st.button(label="Generate test data for scenario")
         if click_data:
-            response_data = langchain_helper.generate_test_data(test_data_scenario)
+            response_data = self.generate_test_datas(test_data_scenario)
             st.write(response_data["test_data"])
             download_data = st.download_button(label="Download test data", data=response_data["test_data"],
                                                file_name="test_data.csv")
 
-    @staticmethod
-    def generate_automation_script(test_scenario, lang_dropdown):
+    def generate_automation_script(self, test_scenario, lang_dropdown):
         if lang_dropdown == 'Java':
             framework_dropdown = st.selectbox('Which framework you want to automate?', ('Testng',))
         elif lang_dropdown == 'python':
             framework_dropdown = st.selectbox('Which framework you want to automate?', ('Pytest', 'Robot'))
         click_test_script = st.button(label="Generate test automation script")
         if click_test_script:
-            response2 = langchain_helper.generate_test_script(test_scenario, framework=framework_dropdown,
+            response2 = self.generate_test_script(test_scenario, framework=framework_dropdown,
                                                               lang=lang_dropdown)
             st.session_state.test_script = response2["test_script"]
         edit = st.checkbox(label="edit test script")
